@@ -36,9 +36,9 @@ jobs:
               printf '%s' "$SA_RAW" > /tmp/service_account.json
             fi
           fi
-          # Validate JSON
-          python -m json.tool /tmp/service_account.json >/dev/null
-          chmod 600 /tmp/service_account.json
+        # Validate JSON
+        python -m json.tool /tmp/service_account.json >/dev/null
+        chmod 600 /tmp/service_account.json
 
     - name: Install dependencies
       run: |
