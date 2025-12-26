@@ -20,24 +20,25 @@ jobs:
         with:
           python-version: '3.11'
 
-    - name: Create service account file (handle raw or base64)
-      run: |
-        set -euo pipefail
-        SA_RAW="${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
-        # If the secret starts with a JSON object, write it directly.
-        if echo "$SA_RAW" | sed -n '1s/^[[:space:]]*//p' | grep -q '^\{'; then
-          printf '%s' "$SA_RAW" > /tmp/service_account.json
-        else
-          # Otherwise try base64-decode; if that fails, fall back to raw write.
-          if echo "$SA_RAW" | base64 --decode >/tmp/service_account.json 2>/dev/null; then
-            true
-          else
+      - name: Create service account file (handle raw or base64)
+        env:
+          SA_RAW: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+        run: |
+          set -euo pipefail
+          # If the secret starts with a JSON object, write it directly.
+          if echo "$SA_RAW" | sed -n '1s/^[[:space:]]*//p' | grep -q '^\{'; then
             printf '%s' "$SA_RAW" > /tmp/service_account.json
+          else
+            # Otherwise try base64-decode; if that fails, fall back to raw write.
+            if printf '%s' "$SA_RAW" | base64 --decode >/tmp/service_account.json 2>/dev/null; then
+              true
+            else
+              printf '%s' "$SA_RAW" > /tmp/service_account.json
+            fi
           fi
-        fi
-        # Validate JSON
-        python -m json.tool /tmp/service_account.json >/dev/null
-        chmod 600 /tmp/service_account.json
+          # Validate JSON
+          python -m json.tool /tmp/service_account.json >/dev/null
+          chmod 600 /tmp/service_account.json
 
     - name: Install dependencies
       run: |
