@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           # If the secret starts with a JSON object, write it directly.
-          if echo "$SA_RAW" | sed -n '1s/^[[:space:]]*//p' | grep -q '^\{'; then
+          if echo "$SA_RAW" | sed -n '1s/^[[:space:]]*//p' | grep -q '^{'; then
             printf '%s' "$SA_RAW" > /tmp/service_account.json
           else
             # Otherwise try base64-decode; if that fails, fall back to raw write.
@@ -36,16 +36,16 @@ jobs:
               printf '%s' "$SA_RAW" > /tmp/service_account.json
             fi
           fi
-        # Validate JSON
-        python -m json.tool /tmp/service_account.json >/dev/null
-        chmod 600 /tmp/service_account.json
+          # Validate JSON
+          python -m json.tool /tmp/service_account.json >/dev/null
+          chmod 600 /tmp/service_account.json
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Run sheet_drive.py script
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: /tmp/service_account.json
-      run: python sheet_drive.py
+      - name: Run sheet_drive.py script
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/service_account.json
+        run: python sheet_drive.py
